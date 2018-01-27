@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Simple paint app</title>
+	<style>
+		.container{
+			width: 100%;
+			height: 100vh;
+
+		}
+		*
+{
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+    box-sizing: border-box;
+    font-family: 'Indie Flower', cursive;
+}
+body
+{
+    height:auto;
+    margin:0;
+}
+.row
+{
+    width:100%;
+}
+.col-1
+{
+    width:8.33%
+}
+.col-2
+{
+    width:16.66%
+}
+.col-3
+{
+    width:25%
+}
+.col-4
+{
+    width:33.33%
+}
+.col-5
+{
+    width:41.66%
+}
+.col-6
+{
+    width:50%
+}
+.col-7
+{
+    width:58.33%
+}
+.col-8
+{
+    width:66.66%
+}
+.col-9
+{
+    width:75%
+}
+.col-10
+{
+    width:83.33%
+}
+.col-11
+{
+    width:91.66%
+}
+.col-12
+{
+    width:100%
+}
+
+
+		.header{
+			text-align: center;
+			font-weight: 500;
+			font-size: larger;
+		}
+		canvas{
+			border: 1px solid black;
+			height: 80%;
+			width: 80%;
+		}
+		 button{
+        position:absolute;
+        top: 83%;
+        left: 79%;
+        border: 1px solid gray;
+    }
+	</style>
+</head>
+<body>
+<div class="container">
+	<div class="row">
+		<div class="header">
+			<h2>Simple Paint App</h2> 
+		</div>
+	</div>
+	<div class="wrapper">
+    	<button onClick="clearCanvas()" class="button">CLEAR</button>
+    </div>
+	<div class="row">
+		<div class="col-12 md-offset-2" style="padding-left: 15%">
+			<canvas id="mycanvas" >
+				
+			</canvas>
+		</div>
+	</div>
+</div>
+
+<script>
+
+
+        var canvas,
+        context,
+        dragging = true,
+        dragStart,
+        snapshot;
+
+
+    function getCanvasCoordinates(event) {
+        var x = event.clientX - canvas.getBoundingClientRect().left,
+            y = event.clientY - canvas.getBoundingClientRect().top;
+
+        return {x: x, y: y};
+    }
+
+    function takeSnapshot() {
+        snapshot = context.getImageData(0, 0, canvas.width, canvas.height);
+    }
+
+    function restoreSnapshot() {
+        context.putImageData(snapshot, 0, 0);
+    }
+    function drawPolygon(position, sides, angle) {
+        var coordinates = [],
+            radius = Math.sqrt(Math.pow((dragStart.x - position.x), 2) + Math.pow((dragStart.y - position.y), 2)),
+            
+            index = 0;
+
+        for (index = 0; index < sides; index++) {
+            coordinates.push({x: dragStart.x + radius * Math.cos(angle), y: dragStart.y - radius * Math.sin(angle)});
+            angle += (2 * Math.PI) / sides;
+        }
+
+        context.beginPath();
+        context.moveTo(coordinates[0].x, coordinates[0].y);
+        for (index = 1; index < sides; index++) {
+            context.lineTo(coordinates[index].x, coordinates[index].y);
+        }
+
+        context.closePath();
+    }
+
+    function draw(position) {
+         drawPolygon(position, 3, 90 * (Math.PI / 180));
+            context.fillStyle =getRandomColor();
+            context.fill();
+            context.stroke();
+    }
+
+    function dragStart(event) {
+        dragging = true;
+        dragStart = getCanvasCoordinates(event);
+        takeSnapshot();
+    }
+
+    function drag(event) {
+        var position;
+        if (dragging === true) {
+            restoreSnapshot();
+            position = getCanvasCoordinates(event);
+            draw(position, "Triangle");
+        }
+    }
+
+    function dragStop(event) {
+        dragging = false;
+        restoreSnapshot();
+        var position = getCanvasCoordinates(event);
+        draw(position, "Triangle");
+    }
+
+    function getRandomColor() {
+      var letters = '0123456789ABCDEF';
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+    function clearCanvas()
+    {
+        clickX = new Array();
+        clickY = new Array();
+        clickDrag = new Array();
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+    }
+    function init() {
+        canvas = document.getElementById("mycanvas");
+        context = canvas.getContext("2d");
+        context.strokeStyle = 'black';
+        context.fillStyle = 'red';
+        context.lineWidth = 4;
+        context.lineCap = 'round';
+
+
+        canvas.addEventListener('mousedown', dragStart, false);
+        canvas.addEventListener('mousemove', drag, false);
+        canvas.addEventListener('mouseup', dragStop, false);
+    }
+
+    window.addEventListener('load', init, false);
+</script>
+</body>
+
+</html>
